@@ -374,3 +374,110 @@ wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$P
 ```
 ![figure1D_mature_FC](figures/figure1D_premature_expression.png)
 
+## Figure 2
+
+### Figure 2A
+```
+rpg = read.delim("Ribosomal_Protein_Genes.txt", header=FALSE, col.names=c("CommonName", "Type", "Source"))
+
+significant = read.delim("supplemental_table_3.txt", header=TRUE) %>%
+    select(gene_id=Official.gene.symbol, Chromosome, sigRank=Position.Intron, sigStart=Start.Intron, sigEnd=End.Intron)
+
+fpkm = read.delim("GSM2535498_ctrl48h_13529_4_D223KACXX_genes.fpkm_tracking.txt", header=TRUE) %>% 
+  select(gene_id, locus, FPKM) %>% 
+  separate(locus, c("first", "stop"), sep=c("-")) %>%
+  separate(first, c("chromosome", "start")) %>%
+  mutate(Significant=gene_id %in% significant$gene_id) %>%
+  mutate(RPG=gene_id %in% rpg$CommonName) %>%
+  mutate(Group = case_when(!Significant & !RPG ~ "Non-RPG",
+                            !Significant & RPG ~ "RPG",
+                             Significant & !RPG ~ "Significant Non-RPG",
+                             Significant & RPG ~ "Significant RPG"))
+
+figure2a_dotplot = ggplot(fpkm %>% filter(FPKM > 0), aes(x=Significant, y=FPKM, color=Group, alpha=Group)) +
+  theme(axis.ticks.x = element_blank(),
+        axis.line.x = element_blank()) +
+  scale_y_continuous(trans='log10', name='FPKM', limits=c(.001, 8000), breaks=c(.1, 10, 1000)) +
+  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
+  scale_alpha_manual(values=c(.1, 1, 1, 1)) +
+  scale_size_manual(values=c(.01, .1,.1,.1)) +
+  geom_jitter(shape=20)
+
+figure2a_boxplot = ggplot(fpkm %>% filter(FPKM > 0), aes(x=Significant, y=FPKM, color=Group)) +
+  theme(axis.title = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none') +
+  scale_y_continuous(trans='log10', name='FPKM', limits=c(.001, 8000), breaks=c(.1, 10, 1000)) +
+  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
+  geom_boxplot(outlier.shape = NA)
+
+figure2a = grid.arrange(figure2a_dotplot, figure2a_boxplot, nrow=1)
+
+wilcox.test((fpkm %>% filter(Group=='Non-RPG'))$FPKM, (fpkm %>% filter(Group=='Significant RPG'))$FPKM, alternative='two.sided')
+wilcox.test((fpkm %>% filter(Group=='Non-RPG'))$FPKM, (fpkm %>% filter(Group=='Significant Non-RPG'))$FPKM, alternative='two.sided', exact=TRUE)
+```
+![figure2A](figures/figure2A.png)
+
+### FIgure 2B
+
+```
+gene_end = read.delim("UCSC_genes.bed", header=FALSE, col.names=c("Chromosome", "Start", "Stop", "UCSC", "Score", "Orientation", "CDS_Start", "CDS_End", "Blank", "Exon_Count", "Exon_Starts", "Exon_Ends")) %>%
+          select(UCSC, Transcript_Stop=Stop)
+
+alias = read.delim("kgSpAlias.txt", header=TRUE) %>% select(UCSC=X.kgID, gene_id=alias)
+introns = read.delim("introns.bed", header=FALSE, col.names=c("Chromosome", "Start", "Stop", "Name", "Extra", "Orientation")) %>%
+          separate(Name, c("UCSC"), sep='_') %>%
+          mutate(Start=Start+1)
+
+sig_introns = significant %>% left_join(introns, by=c("Chromosome"="Chromosome", "sigStart"="Start", "sigEnd"="Stop")) %>%
+              unite(Key, c("UCSC", "sigStart", "sigEnd"), sep=';')
+
+rpg_intron = rpg %>% left_join(alias, by=c("CommonName"="gene_id"))
+
+all_introns = introns %>% unite(Key, c("UCSC", "Start", "Stop"), sep=';') %>%
+              mutate(Significant = Key %in% sig_introns$Key) %>%
+              separate(Key, into=c("UCSC", "Start", "Stop"), sep=';') %>%
+              left_join(gene_end, by=c("UCSC"="UCSC")) %>%
+              mutate(Distance=Transcript_Stop-as.numeric(Stop)) %>%
+              mutate(RPG=UCSC %in% rpg_intron$UCSC) %>%
+              mutate(Group = case_when(!Significant & !RPG ~ "Non-RPG",
+                            !Significant & RPG ~ "RPG",
+                             Significant & !RPG ~ "Significant Non-RPG",
+                             Significant & RPG ~ "Significant RPG")) %>%
+              arrange(Distance) %>%
+              distinct(Chromosome, Start, Stop, .keep_all = TRUE)
+              
+
+figure2b_dotplot = ggplot(all_introns, aes(x=Significant, y=Distance, color=Group, alpha=Group)) +
+  theme(axis.title = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank()) +
+  scale_y_continuous(trans='log10') +
+  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
+  scale_alpha_manual(values=c(.01, 1, 1, 1)) +
+  scale_size_manual(values=c(.01, .1,.1,.1)) +
+  geom_jitter(shape=20)
+
+  figure2b_dotplot
+
+  figure2b_boxplot = ggplot(all_introns, aes(x=Significant, y=Distance, color=Group)) +
+  theme(axis.title = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none') +
+  scale_y_continuous(trans='log10') +
+  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
+  geom_boxplot(outlier.shape = NA)
+  
+  figure2b_boxplot
+  
+  figure2b = grid.arrange(figure2b_dotplot, figure2b_boxplot, nrow=1)
+  
+  
+wilcox.test((all_introns %>% filter(Group=='Non-RPG'))$Distance, (all_introns %>% filter(Group=='Significant RPG'))$Distance, alternative='two.sided')
+wilcox.test((all_introns %>% filter(Group=='Non-RPG'))$Distance, (all_introns %>% filter(Group=='Significant Non-RPG'))$Distance, alternative='two.sided', exact=TRUE)
+```
+![figure2B](figures/figure2B.png)
