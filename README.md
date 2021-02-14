@@ -300,4 +300,77 @@ wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==2000
 ```
 ![figure1C](figures/figure1C.png)
 
+### Figure 1D
+```
+quasirandom_layers = list(
+  theme(axis.title = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        plot.margin = margin(0,0,0,0),
+        legend.position = 'none'),
+  scale_alpha_manual(values=c(0, 1)),
+  geom_quasirandom(color='#cb181d', size=.001))
+
+fold_change_high = downsample_deseq %>% filter(Seed==1) %>% dcast(Gene+Rank+Size~Type, value.var="log2FoldChange") %>% unite(Intron, c(Gene, Rank), sep=';') %>% filter(Size==800000) %>% select(-Size) %>% mutate(SI_ratio = Premature-Mature)
+
+significant = downsample_deseq %>% filter(Seed==1) %>%
+    dcast(Gene+Rank+Size ~ Type, value.var='padj') %>%
+    mutate(Significant = case_when(is.na(Premature) & is.na(Mature) ~ "Non-Significant",
+                                   is.na(Premature) & Mature < .05 ~ "Significant",
+                                   is.na(Mature) & Premature < .05 ~ "Significant",
+                                   Mature < .05 & Premature < .05 ~ "Significant",
+                                   TRUE ~ "Non-Significant")) %>%
+    select(-Premature, -Mature) %>%
+    unite(Intron, c(Gene,Rank), sep=';') %>%
+    merge(fold_change_high, by="Intron") %>%
+    merge(mpe_expression, by="Intron")
+
+significant$Size = factor(significant$Size, levels=c("800000", "400000", "200000")) 
+
+high_count = nrow((significant %>% filter(Size==800000, Significant=='Significant')))
+medium_count = nrow((significant %>% filter(Size==400000, Significant=='Significant')))
+low_count = nrow((significant %>% filter(Size==200000, Significant=='Significant')))
+
+ggplot(significant, aes(x=Size, y=2^Mature, alpha=Significant)) +
+  scale_y_continuous(trans='log2', limits=c(1/128, 2), breaks=c(.008, .032, .125, .5, 1, 2)) +
+  geom_hline(yintercept = 1, color='grey', linetype=2) +
+  quasirandom_layers
+  
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature, (significant %>% filter(Size==400000, Significant=='Significant'))$Mature, alternative='two.sided')
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature, (significant %>% filter(Size==200000, Significant=='Significant'))$Mature, alternative='two.sided')
+```
+
+![figure1D_mature_FC](figures/figure1D_mature_fold_change.png)
+
+```
+ggplot(significant, aes(x=Size, y=2^Premature, alpha=Significant)) +
+    scale_y_continuous(trans='log2', breaks=c(.016, .125, 1, 8, 64)) +
+    geom_hline(yintercept = 1, color='grey', linetype=2) +
+    quasirandom_layers
+               
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature, (significant %>% filter(Size==400000, Significant=='Significant'))$Premature, alternative='two.sided')
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature, (significant %>% filter(Size==200000, Significant=='Significant'))$Premature, alternative='two.sided')
+```
+![figure1D_premature_FC](figures/figure1D_premature_fold_change.png)
+
+
+```
+ggplot(significant, aes(x=Size, y=Mature_Average, alpha=Significant)) +
+    scale_y_continuous(trans='log10', breaks=c(.1, 1, 10, 100, 1000, 10000, 100000)) +
+    quasirandom_layers
+    
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==400000, Significant=='Significant'))$Mature_Average, alternative='less')
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==200000, Significant=='Significant'))$Mature_Average, alternative='less')
+```
+![figure1D_mature_FC](figures/figure1D_mature_expresison.png)
+
+```
+ggplot(significant, aes(x=Size, y=Premature_Average, alpha=Significant)) +
+    scale_y_continuous(trans='log10', breaks=c(.1, 1, 10, 100, 1000)) +
+    quasirandom_layers
+               
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature_Average, (significant %>% filter(Size==400000, Significant=='Significant'))$Premature_Average, alternative='less')
+wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature_Average, (significant %>% filter(Size==200000, Significant=='Significant'))$Premature_Average, alternative='less')
+```
+![figure1D_mature_FC](figures/figure1D_premature_expression.png)
 
