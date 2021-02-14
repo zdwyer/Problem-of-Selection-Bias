@@ -187,7 +187,7 @@ fold_change %>% filter(Type=="Premature") %>%
   summarise(Count=n())
 ```
 
-(figure1A)[figures/figure1A.png]
+![figure1A](figures/figure1A.png)
 
 ### Read Downsampling Data
 
