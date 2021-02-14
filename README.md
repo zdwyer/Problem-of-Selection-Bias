@@ -116,7 +116,7 @@ DESeq_analysis = function(data, sizes, seeds) {
 
 ### Read Auxilary Files
 ```
-curated = read.delim("Currated_List_zwd.txt", header=FALSE, col.names = c("Intron")) %>% mutate(Intron_2 = Intron) %>% separate(Intron_2, c("Gene", "Rank"), sep=";")
+curated = read.delim("currated_list.txt", header=FALSE, col.names = c("Intron")) %>% mutate(Intron_2 = Intron) %>% separate(Intron_2, c("Gene", "Rank"), sep=";")
 
 intron_properties = read.delim("sc_intron_properties(barrass).txt", header=TRUE) %>% 
                     unite(Intron, c("Gene", "Rank"), sep=';') %>%
@@ -125,14 +125,14 @@ intron_properties = read.delim("sc_intron_properties(barrass).txt", header=TRUE)
 
 ### Read Full Dataset
 ```
-full_raw = read.delim("shifted_full.txt", header=TRUE) %>%
+full_raw = read.delim("full_counts.txt", header=TRUE) %>%
                 filter(Intron %in% curated$Intron) %>%
                 separate(Intron, into=c("Gene", "Rank"), sep=";") %>%
-                separate(Strain, into=c("Strain", "Condition"), sep='_')
-full_raw$Strain = factor(full_raw$Strain, levels=c("scJS1", "scJS7"))
+                mutate(Size=0, Seed=0)
+full_raw$Strain = factor(full_raw$Strain, levels=c("WT", "prp2"))
 full_deseq = DESeq_analysis(data=full_raw, sizes=c(0), seeds=c(0))
 
-mpe_expression = full_raw %>% filter(Size==0, Seed==0, Strain=='scJS1') %>%
+mpe_expression = full_raw %>% filter(Size==0, Seed==0, Strain=='WT') %>%
                     select(Replicate, Gene, Rank, Mature, Premature) %>%
                     group_by(Gene, Rank) %>%
                     summarise(Mature_Average = mean(Mature), Premature_Average=mean(Premature)) %>%
@@ -169,8 +169,11 @@ ggplot(fold_change, aes(x=Type, y=Intron, fill=2^log2FoldChange, color=2^log2Fol
         axis.line=element_blank(),
         legend.position = 'bottom',
         legend.margin = margin(0,0,0,0),
+        #legend.text = element_blank(),
         panel.background = element_blank(),
         panel.spacing = unit(0, 'cm'),
+        #strip.text = element_blank(),
+        #strip.background = element_blank(),
         plot.background = element_blank(),
         plot.margin = margin(0,0,0,0)) +
   scale_fill_gradient2(trans='log2', low='dodgerblue3', mid='grey90', high='#eadf0c', limits=c(.125,8), oob=squish, name=element_blank(), labels=scaleFUN) +
@@ -183,6 +186,9 @@ fold_change %>% filter(Type=="Premature") %>%
   group_by(Significant) %>%
   summarise(Count=n())
 ```
+
+(figure1A)[figures/figure1A.png]
+
 ### Read Downsampling Data
 
 ```
