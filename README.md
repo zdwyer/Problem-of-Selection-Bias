@@ -309,7 +309,7 @@ quasirandom_layers = list(
         plot.margin = margin(0,0,0,0),
         legend.position = 'none'),
   scale_alpha_manual(values=c(0, 1)),
-  geom_quasirandom(color='#cb181d', size=.001))
+  geom_quasirandom(color='#cb181d')
 
 fold_change_high = downsample_deseq %>% filter(Seed==1) %>% dcast(Gene+Rank+Size~Type, value.var="log2FoldChange") %>% unite(Intron, c(Gene, Rank), sep=';') %>% filter(Size==800000) %>% select(-Size) %>% mutate(SI_ratio = Premature-Mature)
 
@@ -362,7 +362,7 @@ ggplot(significant, aes(x=Size, y=Mature_Average, alpha=Significant)) +
 wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==400000, Significant=='Significant'))$Mature_Average, alternative='less')
 wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==200000, Significant=='Significant'))$Mature_Average, alternative='less')
 ```
-![figure1D_mature_FC](figures/figure1D_mature_expresison.png)
+![figure1D_mature_expresison](figures/figure1D_mature_expression.png)
 
 ```
 ggplot(significant, aes(x=Size, y=Premature_Average, alpha=Significant)) +
