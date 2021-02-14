@@ -204,292 +204,55 @@ downsample_deseq = DESeq_analysis(data=downsample_raw, sizes=c(200000, 400000, 8
 
 ```
 ma_layers = list(
-    theme(legend.position = 'none',
-        axis.text=element_blank(),
-        axis.title=element_blank(),
-        plot.margin = margin(0,0,0,0)),
     scale_x_continuous(trans='log10', name="Normalized Counts", breaks = c(.1, 1, 10, 100, 1000, 10000, 100000), limits=c(.1, 100000)),
     scale_color_manual(values=c('black', '#cb181d')),
     geom_hline(yintercept = 1, color='grey', linetype=2),
-    geom_point(size=.1))
-
-high_mature = shifted_specific_deseq %>% filter(Seed==1, Size==800000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-high_mature_ma = ggplot(high_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                    ma_layers +
-                    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_high_mature.pdf", plot=high_mature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-high_premature = shifted_specific_deseq %>% filter(Seed==1, Size==800000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-high_premature_ma = ggplot(high_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                      ma_layers +
-                      scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_high_premature.pdf", plot=high_premature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-
-medium_mature = shifted_specific_deseq %>% filter(Seed==1, Size==400000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-medium_mature_ma = ggplot(medium_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                    ma_layers +
-                    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_medium_mature.pdf", plot=medium_mature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-medium_premature = shifted_specific_deseq %>% filter(Seed==1, Size==400000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-medium_premature_ma = ggplot(medium_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                      ma_layers +
-                      scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_medium_premature.pdf", plot=medium_premature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-
-low_mature = shifted_specific_deseq %>% filter(Seed==1, Size==200000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-low_mature_ma = ggplot(low_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                    ma_layers +
-                    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_low_mature.pdf", plot=low_mature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-low_premature = shifted_specific_deseq %>% filter(Seed==1, Size==200000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
-low_premature_ma = ggplot(low_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
-                      ma_layers +
-                      scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1B_low_premature.pdf", plot=low_premature_ma, device='pdf', width=2.25,height=2.25, units=c("cm"), useDingbats=FALSE)
-
-
-counts = shifted_specific_deseq %>% filter(Seed==1, padj<.05) %>%
-            group_by(Type, Size) %>%
-            summarise(count=n())
+    geom_point()
+    
+high_mature = downsample_deseq %>% filter(Seed==1, Size==800000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(high_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)  
 ```
 
-### Figure 1C
+![figure1B_high_mature](figures/figure1B_high_mature)
 
 ```
-boxplot_layers = list(
-        facet_grid(~Size, switch='x'),
-        theme(axis.title = element_blank(),
-              axis.text = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.line.x = element_blank(),
-        strip.background = element_blank(),
-        strip.text = element_blank(),
-        legend.position = 'none',
-        plot.margin = margin(0,0,0,0)),
-  scale_color_manual(values=c("#cb181d", "black")),
-  geom_quasirandom(size=.05))
-
-boxplot_data = shifted_specific_deseq %>% filter(Seed==1) %>%
-    dcast(Gene+Rank+Size ~ Type, value.var='padj') %>%
-    mutate(Significant = case_when(is.na(Premature) & Mature < .05 ~ "Significant",
-                                   is.na(Mature) & Premature < .05 ~ "Significant",
-                                   Mature < .05 & Premature < .05 ~ "Significant",
-                                   TRUE ~ "Non-Significant")) %>%
-   unite(Intron, c(Gene, Rank), sep=';') %>%
-   merge(intron_properties, by='Intron') %>%
-   select(Intron, Size, Significant, three_score, intron_length)
-   
-boxplot_data$Size = factor(boxplot_data$Size, levels=c("800000", "400000", "200000"))
-boxplot_data$Significant = factor(boxplot_data$Significant, levels=c("Significant", "Non-Significant"))
-
-three_score_boxplot = ggplot(boxplot_data, aes(x=Significant, y=three_score, color=Significant)) +
-  boxplot_layers
-
-intron_length_boxplot =ggplot(boxplot_data, aes(x=Significant, y=intron_length, color=Significant)) +
-  boxplot_layers +
-  scale_y_continuous(trans='log10', limits=c(50,1100), breaks=c(100, 500, 1000))
-
-intron_length_boxplot
-
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1C_intron_length.pdf", plot=intron_length_boxplot, device='pdf', width=5.15, height=2.5, units=c("cm"), useDingbats=FALSE)
-
-wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==800000), alternative='two.sided')
-wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==400000), alternative='two.sided')
-wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==200000), alternative='two.sided')
-
-wilcox.test(intron_properties$intron_length, (boxplot_data %>% filter(Size==200000, Significant=="Significant"))$intron_length)
+high_premature = downsample_deseq %>% filter(Seed==1, Size==800000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(high_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
 ```
-
-### Figure 1D
+![figure1B_high_premature](figures/figure1B_high_premature)
 
 ```
-quasirandom_layers = list(
-  theme(axis.text = element_blank(),
-        axis.title = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.line.x = element_blank(),
-        plot.margin = margin(0,0,0,0),
-        legend.position = 'none'),
-  scale_alpha_manual(values=c(0,.5)),
-  geom_quasirandom(color='#cb181d', size=.001))
-
-fold_change_high = shifted_specific_deseq %>% filter(Seed==1) %>% dcast(Gene+Rank+Size~Type, value.var="log2FoldChange") %>% unite(Intron, c(Gene, Rank), sep=';') %>% filter(Size==800000) %>% select(-Size) %>% mutate(SI_ratio = Premature-Mature)
-
-significant = shifted_specific_deseq %>% filter(Seed==1) %>%
-    dcast(Gene+Rank+Size ~ Type, value.var='padj') %>%
-    mutate(Significant = case_when(is.na(Premature) & is.na(Mature) ~ "Non-Significant",
-                                   is.na(Premature) & Mature < .05 ~ "Significant",
-                                   is.na(Mature) & Premature < .05 ~ "Significant",
-                                   Mature < .05 & Premature < .05 ~ "Significant",
-                                   TRUE ~ "Non-Significant")) %>%
-    select(-Premature, -Mature) %>%
-    unite(Intron, c(Gene,Rank), sep=';') %>%
-    merge(fold_change_high, by="Intron") %>%
-    merge(mpe_expression, by="Intron")
-
-significant$Size = factor(significant$Size, levels=c("800000", "400000", "200000"))   
-
-premature_fc = ggplot(significant, aes(x=Size, y=2^Premature, alpha=Significant)) +
-               scale_y_continuous(trans='log2', breaks=c(.016, .125, 1, 8, 64)) +
-               geom_hline(yintercept = 1, color='grey', linetype=2) +
-               quasirandom_layers
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1D_premature_fold_change.pdf", plot=premature_fc, device='pdf', width=2.25, height=2.25, units=c("cm"), useDingbats=FALSE)
-
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature, (significant %>% filter(Size==400000, Significant=='Significant'))$Premature, alternative='two.sided')
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature, (significant %>% filter(Size==200000, Significant=='Significant'))$Premature, alternative='two.sided')
-
-nrow((significant %>% filter(Size==800000, Significant=='Significant')))
-nrow((significant %>% filter(Size==400000, Significant=='Significant')))
-nrow((significant %>% filter(Size==200000, Significant=='Significant')))
-
-mature_fc = ggplot(significant, aes(x=Size, y=2^Mature, alpha=Significant)) +
-  scale_y_continuous(trans='log2', limits=c(1/128, 2), breaks=c(.008, .032, .125, .5, 1, 2)) +
-  geom_hline(yintercept = 1, color='grey', linetype=2) +
-  quasirandom_layers
-
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1D_mature_fold_change.pdf", plot=mature_fc, device='pdf', width=2.25, height=2.25, units=c("cm"), useDingbats=FALSE)
-
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature, (significant %>% filter(Size==400000, Significant=='Significant'))$Mature, alternative='two.sided')
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature, (significant %>% filter(Size==200000, Significant=='Significant'))$Mature, alternative='two.sided')
-
-premature_expression = ggplot(significant, aes(x=Size, y=Premature_Average, alpha=Significant)) +
-               scale_y_continuous(trans='log10', breaks=c(.1, 1, 10, 100, 1000)) +
-               quasirandom_layers
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1D_premature_expression.pdf", plot=premature_expression, device='pdf', width=2.25, height=2.25, units=c("cm"), useDingbats=FALSE)
-
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature_Average, (significant %>% filter(Size==400000, Significant=='Significant'))$Premature_Average, alternative='less')
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Premature_Average, (significant %>% filter(Size==200000, Significant=='Significant'))$Premature_Average, alternative='less')
-
-mature_expression = ggplot(significant, aes(x=Size, y=Mature_Average, alpha=Significant)) +
-               scale_y_continuous(trans='log10', breaks=c(.1, 1, 10, 100, 1000, 10000, 100000)) +
-               quasirandom_layers
-
-ggsave(filename="~/Documents/Lab/Pleiss/EditorLetter/Figures/Figure1D_mature_expression.pdf", plot=mature_expression, device='pdf', width=2.25, height=2.25, units=c("cm"), useDingbats=FALSE)
-
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==400000, Significant=='Significant'))$Mature_Average, alternative='less')
-wilcox.test((significant %>% filter(Size==800000, Significant=='Significant'))$Mature_Average, (significant %>% filter(Size==200000, Significant=='Significant'))$Mature_Average, alternative='less')
+medium_mature = downsample_deseq %>% filter(Seed==1, Size==400000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(medium_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
 ```
-
-# Figure 2
-
-Gene expression data was obtained from [GSM2535498](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM2535498)
-
-## Figure 2A
+![figure1B_medium_mature](figures/figure1B_medium_mature)
 
 ```
-rpg = read.delim("Ribosomal_Protein_Genes.txt", header=FALSE, col.names=c("CommonName", "Type", "Source"))
-
-significant = read.delim("supplemental_table_3.txt", header=TRUE) %>%
-    select(gene_id=Official.gene.symbol, Chromosome, sigRank=Position.Intron, sigStart=Start.Intron, sigEnd=End.Intron)
-
-fpkm = read.delim("GSM2535498_ctrl48h_13529_4_D223KACXX_genes.fpkm_tracking.txt", header=TRUE) %>% 
-  select(gene_id, locus, FPKM) %>% 
-  separate(locus, c("first", "stop"), sep=c("-")) %>%
-  separate(first, c("chromosome", "start")) %>%
-  mutate(Significant=gene_id %in% significant$gene_id) %>%
-  mutate(RPG=gene_id %in% rpg$CommonName) %>%
-  mutate(Group = case_when(!Significant & !RPG ~ "Non-RPG",
-                            !Significant & RPG ~ "RPG",
-                             Significant & !RPG ~ "Significant Non-RPG",
-                             Significant & RPG ~ "Significant RPG"))
-
-figure2a_dotplot = ggplot(fpkm %>% filter(FPKM > 0), aes(x=Significant, y=FPKM, color=Group, alpha=Group)) +
-  theme(axis.title = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.line.x = element_blank(),
-        axis.text = element_blank(),
-        legend.position = 'none') +
-  scale_y_continuous(trans='log10', name='FPKM', limits=c(.001, 8000), breaks=c(.1, 10, 1000)) +
-  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
-  scale_alpha_manual(values=c(.006, 1, 1, 1)) +
-  scale_size_manual(values=c(.01, .1,.1,.1)) +
-  geom_jitter(shape=20)
-
-figure2a_boxplot = ggplot(fpkm %>% filter(FPKM > 0), aes(x=Significant, y=FPKM, color=Group)) +
-  theme(axis.title = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.line.x = element_blank(),
-        axis.text = element_blank(),
-        legend.position = 'none') +
-  scale_y_continuous(trans='log10', name='FPKM', limits=c(.001, 8000), breaks=c(.1, 10, 1000)) +
-  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
-  geom_boxplot(outlier.shape = NA)
-
-figure2a = grid.arrange(figure2a_dotplot, figure2a_boxplot, nrow=1)
-
-figure2a
+medium_premature = downsample_deseq %>% filter(Seed==1, Size==400000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(medium_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=s
 ```
-
-#### Significance Testing
-```
-wilcox.test((fpkm %>% filter(Group=='Non-RPG'))$FPKM, (fpkm %>% filter(Group=='Significant RPG'))$FPKM, alternative='two.sided')
-wilcox.test((fpkm %>% filter(Group=='Non-RPG'))$FPKM, (fpkm %>% filter(Group=='Significant Non-RPG'))$FPKM, alternative='two.sided', exact=TRUE)
-```
-
-### Figure 2B
+![figure1B_medium_premature](figures/figure1B_medium_premature)
 
 ```
-gene_end = read.delim("UCSC_genes.bed", header=FALSE, col.names=c("Chromosome", "Start", "Stop", "UCSC", "Score", "Orientation", "CDS_Start", "CDS_End", "Blank", "Exon_Count", "Exon_Starts", "Exon_Ends")) %>%
-          select(UCSC, Transcript_Stop=Stop)
-
-alias = read.delim("kgSpAlias.txt", header=TRUE) %>% select(UCSC=X.kgID, gene_id=alias)
-introns = read.delim("introns.bed", header=FALSE, col.names=c("Chromosome", "Start", "Stop", "Name", "Extra", "Orientation")) %>%
-          separate(Name, c("UCSC"), sep='_') %>%
-          mutate(Start=Start+1)
-
-sig_introns = significant %>% left_join(introns, by=c("Chromosome"="Chromosome", "sigStart"="Start", "sigEnd"="Stop")) %>%
-              unite(Key, c("UCSC", "sigStart", "sigEnd"), sep=';')
-
-rpg_intron = rpg %>% left_join(alias, by=c("CommonName"="gene_id"))
-
-all_introns = introns %>% unite(Key, c("UCSC", "Start", "Stop"), sep=';') %>%
-              mutate(Significant = Key %in% sig_introns$Key) %>%
-              separate(Key, into=c("UCSC", "Start", "Stop"), sep=';') %>%
-              left_join(gene_end, by=c("UCSC"="UCSC")) %>%
-              mutate(Distance=Transcript_Stop-as.numeric(Stop)) %>%
-              mutate(RPG=UCSC %in% rpg_intron$UCSC) %>%
-              mutate(Group = case_when(!Significant & !RPG ~ "Non-RPG",
-                            !Significant & RPG ~ "RPG",
-                             Significant & !RPG ~ "Significant Non-RPG",
-                             Significant & RPG ~ "Significant RPG")) %>%
-              arrange(Distance) %>%
-              distinct(Chromosome, Start, Stop, .keep_all = TRUE)
-              
-
-figure2b_dotplot = ggplot(all_introns, aes(x=Significant, y=Distance, color=Group, alpha=Group)) +
-  theme(axis.title = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.line.x = element_blank(),
-        #axis.text = element_blank(),
-        legend.position = 'none') +
-  scale_y_continuous(trans='log10') +
-  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
-  scale_alpha_manual(values=c(.006, 1, 1, 1)) +
-  scale_size_manual(values=c(.01, .1,.1,.1)) +
-  geom_jitter(shape=20)
-
-  figure2b_boxplot = ggplot(all_introns, aes(x=Significant, y=Distance, color=Group)) +
-  theme(axis.title = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.line.x = element_blank(),
-        axis.text = element_blank(),
-        legend.position = 'none') +
-  scale_y_continuous(trans='log10') +
-  scale_color_manual(values=c("#808080", "black", "#FF7879", "#cb181d")) +
-  geom_boxplot(outlier.shape = NA)
-  
-  figure2b = grid.arrange(figure2b_dotplot, figure2b_boxplot, nrow=1)
-  
-  figure2b
-```  
-
-### Significance Testing
+low_mature = downsample_deseq %>% filter(Seed==1, Size==200000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(low_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
+```
+![figure1B_low_mature](figures/figure1B_low_mature)
 
 ```
-wilcox.test((all_introns %>% filter(Group=='Non-RPG'))$Distance, (all_introns %>% filter(Group=='Significant RPG'))$Distance, alternative='two.sided')
-wilcox.test((all_introns %>% filter(Group=='Non-RPG'))$Distance, (all_introns %>% filter(Group=='SignificantNon-RPG'))$Distance, alternative='two.sided', exact=TRUE)
+low_premature = downsample_deseq %>% filter(Seed==1, Size==200000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
+ggplot(low_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) + 
+    ma_layers +
+    scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
 ```
+![figure1B_low_premature](figures/figure1B_low_premature)
