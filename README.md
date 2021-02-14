@@ -256,3 +256,48 @@ ggplot(low_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
 ```
 ![figure1B_low_premature](figures/figure1B_low_premature.png)
+
+#### Count Significant Events
+
+```
+downsample_deseq %>% filter(Seed==1, padj<.05) %>%
+            group_by(Type, Size) %>%
+            summarise(count=n()) %>%
+            dcast(Size ~ Type, value.var="count") %>%
+            arrange(desc(Size))
+```
+
+### Figure 1C
+
+```
+boxplot_data = downsample_deseq %>% filter(Seed==1) %>%
+    dcast(Gene+Rank+Size ~ Type, value.var='padj') %>%
+    mutate(Significant = case_when(is.na(Premature) & Mature < .05 ~ "Significant",
+                                   is.na(Mature) & Premature < .05 ~ "Significant",
+                                   Mature < .05 & Premature < .05 ~ "Significant",
+                                   TRUE ~ "Non-Significant")) %>%
+   unite(Intron, c(Gene, Rank), sep=';') %>%
+   merge(intron_properties, by='Intron') %>%
+   select(Intron, Size, Significant, three_score, intron_length)
+   
+boxplot_data$Size = factor(boxplot_data$Size, levels=c("800000", "400000", "200000"))
+boxplot_data$Significant = factor(boxplot_data$Significant, levels=c("Significant", "Non-Significant"))
+
+intron_length_boxplot =ggplot(boxplot_data, aes(x=Significant, y=intron_length, color=Significant)) +
+    facet_grid(~Size) +
+    theme(axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.line.x = element_blank(),
+          strip.background = element_blank()) +
+    scale_color_manual(values=c("#cb181d", "black")) +
+    scale_y_continuous(trans='log10', limits=c(50,1100), breaks=c(100, 500, 1000), name="Intron Length") +
+    geom_quasirandom()
+    
+wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==800000), alternative='less')
+wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==400000), alternative='less')
+wilcox.test(intron_length ~ Significant, data=boxplot_data %>% filter(Size==200000), alternative='less')
+```
+![figure1C](figures/figure1C.png)
+
+
