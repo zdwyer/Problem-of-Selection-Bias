@@ -215,7 +215,7 @@ ggplot(high_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)  
 ```
 
-![figure1B_high_mature](figures/figure1B_high_mature)
+![figure1B_high_mature](figures/figure1B_high_mature.png)
 
 ```
 high_premature = downsample_deseq %>% filter(Seed==1, Size==800000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
@@ -223,7 +223,7 @@ ggplot(high_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     ma_layers +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
 ```
-![figure1B_high_premature](figures/figure1B_high_premature)
+![figure1B_high_premature](figures/figure1B_high_premature.png)
 
 ```
 medium_mature = downsample_deseq %>% filter(Seed==1, Size==400000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
@@ -231,7 +231,7 @@ ggplot(medium_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     ma_layers +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
 ```
-![figure1B_medium_mature](figures/figure1B_medium_mature)
+![figure1B_medium_mature](figures/figure1B_medium_mature.png)
 
 ```
 medium_premature = downsample_deseq %>% filter(Seed==1, Size==400000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
@@ -239,7 +239,7 @@ ggplot(medium_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant))
     ma_layers +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=s
 ```
-![figure1B_medium_premature](figures/figure1B_medium_premature)
+![figure1B_medium_premature](figures/figure1B_medium_premature.png)
 
 ```
 low_mature = downsample_deseq %>% filter(Seed==1, Size==200000, Type=='Mature', !is.na(padj)) %>% mutate(Significant = padj < .05)
@@ -247,7 +247,7 @@ ggplot(low_mature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     ma_layers +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.001, .004, .016, .064, .25, 1, 2), limits=c(1/1200, 2), labels=scaleFUN)
 ```
-![figure1B_low_mature](figures/figure1B_low_mature)
+![figure1B_low_mature](figures/figure1B_low_mature.png)
 
 ```
 low_premature = downsample_deseq %>% filter(Seed==1, Size==200000, Type=='Premature', !is.na(padj)) %>% mutate(Significant = padj < .05)
@@ -255,4 +255,4 @@ ggplot(low_premature, aes(x=baseMean, y=2^log2FoldChange, color=Significant)) +
     ma_layers +
     scale_y_continuous(trans='log2', name="Fold Change", breaks = c(.125, 1, 8, .064, 64), limits=c(.125, 64), labels=scaleFUN)
 ```
-![figure1B_low_premature](figures/figure1B_low_premature)
+![figure1B_low_premature](figures/figure1B_low_premature.png)
